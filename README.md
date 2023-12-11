@@ -1,5 +1,5 @@
 ﻿# ComfyUI Prompt Format
-This is an Extension for [ComfyUI](https://github.com/comfyanonymous/ComfyUI), which helps formatting texts.
+This is an Extension for [ComfyUI](https://github.com/comfyanonymous/ComfyUI), which helps formatting texts
 
 ## Features
 - [x] Remove duplicated **spaces** and **commas**
@@ -12,4 +12,13 @@ This is an Extension for [ComfyUI](https://github.com/comfyanonymous/ComfyUI), w
   - Duplicates removal only checks within the same line
 
 ## Configs
-T.B.A
+By default, this only processes the built-in `CLIPTextEncode` node. You can also add custom nodes yourself by adding entries to the `configs.js` script.
+*(Open a `.json` workflow file to see the exact field names)*
+
+The entries are in the format of `"NodeType": ["property", dedupe?, [keep_keywords]]`
+- **NodeType:** The name of the node *(**eg.** `"CLIPTextEncode"`)*
+- **property:** The property to search for strings *(Probably will always be `"widgets_values"`)*
+- **dedupe?:** Should remove duplicates or not *(`true` / `false`)*
+- **[keep_keywords]:** An array of special keywords to ignore when removing duplicates. 
+If you have custom prompt nodes that use certain keywords, add them to the list to not get deleted. 
+*(**eg.** For `Automatic1111`, it would be `["BREAK", "AND"]` as those are built-in keywords)*
