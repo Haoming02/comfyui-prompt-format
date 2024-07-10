@@ -1,4 +1,8 @@
-import { formatSettings } from "./configs.js";
+import { app } from "../../scripts/app.js";
+
+export const DEFAULT = {
+	"CLIPTextEncode": ["widgets_values", true, ["BREAK"]],
+}
 
 function constructRE(keywords) {
 	return new RegExp('^(' + keywords.join('|') + ')$');
@@ -6,13 +10,18 @@ function constructRE(keywords) {
 
 // "NodeType": ["property", dedupe?, [keep_keywords]]
 export function Process(graph) {
+	const formatSettings = app.ui.settings.getSettingValue("promptFormat.settings", DEFAULT);
+
 	graph["nodes"].forEach((node) => {
 		const type = String(node["type"]);
-		if (type in formatSettings) {
 
-			const property = formatSettings[type][0];
-			const dedupe = formatSettings[type][1];
-			const keywords = formatSettings[type][2];
+		if (type in formatSettings) {
+			const [property, dedupe, keywords] = formatSettings[type];
+
+			if (!node.hasOwnProperty(property)) {
+				alert(`Node of type "${type}" does not have property "${property}"`);
+				return;
+			}
 
 			if (typeof node[property] === "string") {
 				const lines = node[property].split('\n');
