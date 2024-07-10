@@ -1,0 +1,14 @@
+[project]
+name = "comfyui-prompt-format"
+description = "This is an Extension for ComfyUI, which helps formatting texts."
+version = "1.0.0"
+license = "LICENSE"
+
+[project.urls]
+Repository = "https://github.com/Haoming02/comfyui-prompt-format"
+#  Used by Comfy Registry https://comfyregistry.org
+
+[tool.comfy]
+PublisherId = ""
+DisplayName = "comfyui-prompt-format"
+Icon = ""
