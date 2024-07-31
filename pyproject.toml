@@ -2,7 +2,7 @@
 name = "comfyui-prompt-format"
 description = "Adds a button that formats the prompts in textfields"
 version = "1.0.0"
-license = "MIT"
+license = { text = "MIT License" }
 
 [project.urls]
 Repository = "https://github.com/Haoming02/comfyui-prompt-format"
