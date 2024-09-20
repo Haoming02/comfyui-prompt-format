@@ -1,12 +1,15 @@
 import { app } from "../../scripts/app.js";
 
-export const DEFAULT = {
+const DEFAULT = {
 	"CLIPTextEncode": ["widgets_values", true, ["BREAK"]],
 }
 
-function constructRE(keywords) {
-	return new RegExp('^(' + keywords.join('|') + ')$');
-}
+app.ui.settings.addSetting({
+	id: "promptFormat.settings",
+	name: "Prompt Format Settings",
+	defaultValue: DEFAULT,
+	type: "hidden",
+});
 
 // "NodeType": ["property", dedupe?, [keep_keywords]]
 export function Process(graph) {
@@ -50,54 +53,66 @@ export function Process(graph) {
 function formatString(input, dedupe, keywords) {
 
 	// Remove Duplicate
-	if (dedupe) {
-		const temp = input.split(',');
-
-		const cleanArray = [];
-		const finalArray = [];
-
-		const keep = constructRE(keywords);
-
-		temp.forEach((tag) => {
-			const cleanedTag = tag.replace(/\[|\]|\(|\)|\s+/g, '').trim();
-
-			if (keep.test(cleanedTag)) {
-				finalArray.push(cleanedTag);
-				return;
-			}
-
-			if (!cleanArray.includes(cleanedTag)) {
-				cleanArray.push(cleanedTag);
-				finalArray.push(tag);
-				return;
-			}
-
-			// Keep the brackets to fix later
-			finalArray.push(tag.replace(cleanedTag, ''));
-		});
-
-		input = finalArray.join(', ');
-	}
+	if (dedupe)
+		input = _dedupe(input, _constructRE(keywords));
 
 	// Fix Bracket & Comma
-	input = input.replace(/,\s*\)/g, '),').replace(/,\s*\]/g, '],').replace(/\(\s*,/g, ',(').replace(/\[\s*,/g, ',[');
+	input = input
+		.replace(/,+\s*\)/g, '),')
+		.replace(/,+\s*\]/g, '],')
+		.replace(/\(\s*,+/g, ',(')
+		.replace(/\[\s*,+/g, ',[');
 
 	// Remove Commas
 	let tags = input.split(',').map(word => word.trim()).filter(word => word.length > 0);
 
 	// Remove Stray Brackets
-	const patterns = [/^\(+$/, /^\)+$/, /^\[+$/, /^\]+$/];
-	tags = tags.filter(word => !patterns[0].test(word)).filter(word => !patterns[1].test(word)).filter(word => !patterns[2].test(word)).filter(word => !patterns[3].test(word));
+	const patterns = /^\(+$|^\)+$|^\[+$|^\]+$/;
+	tags = tags.filter(word => !patterns.test(word));
 
-	// Remove Spaces
-	input = tags.join(', ').replace(/\s+/g, ' ');
+	// Remove extra Spaces
+	input = tags.join(', ').replace(/\s{2,}/g, ' ');
 
 	// Fix Bracket & Space
-	input = input.replace(/\s+\)/g, ')').replace(/\s+\]/g, ']').replace(/\(\s+/g, '(').replace(/\[\s+/g, '[');
+	input = input
+		.replace(/\s\)/g, ')')
+		.replace(/\s\]/g, ']')
+		.replace(/\(\s/g, '(')
+		.replace(/\[\s/g, '[');
 
 	// Fix Empty Bracket
 	while (input.match(/\(\s*\)|\[\s*\]/g))
 		input = input.replace(/\(\s*\)|\[\s*\]/g, '');
 
-	return input.split(',').map(word => word.trim()).filter(word => word.length > 0).join(', ');
+	return input.split(',').map(word => word.trim()).filter(word => word).join(', ');
+}
+
+function _constructRE(keywords) {
+	return new RegExp('^(' + keywords.join('|') + ')$');
+}
+
+function _dedupe(input, keywords) {
+	const chunks = input.split(',');
+
+	const uniqueSet = new Set();
+	const resultArray = [];
+
+	chunks.forEach((tag) => {
+		const cleanedTag = tag.replace(/\[|\]|\(|\)/g, '').replace(/\s+/g, ' ').trim();
+
+		if (keywords.test(cleanedTag)) {
+			resultArray.push(tag);
+			return;
+		}
+
+		if (!uniqueSet.has(cleanedTag)) {
+			uniqueSet.add(cleanedTag);
+			resultArray.push(tag);
+			return;
+		}
+
+		resultArray.push(tag.replace(cleanedTag, ''));
+	});
+
+	return resultArray.join(', ');
 }

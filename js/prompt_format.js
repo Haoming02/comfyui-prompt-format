@@ -1,23 +1,42 @@
 import { app } from "../../scripts/app.js";
-import { Process, DEFAULT } from "./functions.js";
+import { Process } from "./functions.js";
 
-app.ui.settings.addSetting({
-	id: "promptFormat.settings",
-	name: "Prompt Format Settings",
-	defaultValue: DEFAULT,
-	type: "hidden",
-});
+function legacy() {
+	const menu = document.querySelector(".comfy-menu");
+
+	const formatButton = document.createElement("button");
+	formatButton.textContent = "Format";
+	formatButton.addEventListener("click", () => app.loadGraphData(Process(app.graph.serialize())));
+
+	const refreshButton = document.getElementById("comfy-refresh-button");
+	menu.insertBefore(formatButton, refreshButton);
+}
+
+async function frontend() {
+	const btn = new (await import("../../scripts/ui/components/button.js")).ComfyButton({
+		icon: "format-clear",
+		action: () => {
+			app.loadGraphData(Process(app.graph.serialize()));
+		},
+		tooltip: "Prompt Format",
+		content: "Format",
+		classList: "comfyui-button comfyui-menu-mobile-collapse"
+	}).element;
+
+	app.menu?.actionsGroup.element.after(btn);
+}
 
 app.registerExtension({
 	name: "Comfy.PromptFormat",
 	async setup() {
-		const menu = document.querySelector(".comfy-menu");
 
-		const formatButton = document.createElement("button");
-		formatButton.textContent = "Format";
-		formatButton.addEventListener("click", () => app.loadGraphData(Process(app.graph.serialize())));
+		try {
+			await frontend();
+		} catch {
+			// No Frontend?
+		}
 
-		const refreshButton = document.getElementById("comfy-refresh-button");
-		menu.insertBefore(formatButton, refreshButton);
+		legacy();
+
 	}
 });
