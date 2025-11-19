@@ -1,7 +1,7 @@
 [project]
 name = "comfyui-prompt-format"
 description = "Add a button that formats the prompts in textfields"
-version = "1.2.0"
+version = "1.2.1"
 license = { text = "MIT License" }
 dependencies = []
 

@@ -13,10 +13,8 @@ function legacy() {
 	const refreshButton = document.getElementById("comfy-refresh-button");
 	menu.insertBefore(formatButton, refreshButton);
 	document.addEventListener("keydown", (e) => {
-		if (e.altKey && e.shiftKey && e.code === "KeyF") {
-			e.preventDefault();
+		if (e.altKey && e.shiftKey && e.code === "KeyF")
 			formatButton.click();
-		}
 	});
 }
 
@@ -32,12 +30,6 @@ async function frontend() {
 	}).element;
 
 	app.menu.actionsGroup.element.after(btn);
-	document.addEventListener("keydown", (e) => {
-		if (e.altKey && e.shiftKey && e.code === "KeyF") {
-			e.preventDefault();
-			btn.click();
-		}
-	});
 }
 
 app.registerExtension({
@@ -46,7 +38,7 @@ app.registerExtension({
 		try {
 			await frontend();
 		} catch {
-			// No Frontend?
+			// No Frontend
 		}
 
 		legacy();
